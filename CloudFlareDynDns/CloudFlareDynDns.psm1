@@ -96,14 +96,14 @@ Function Update-CloudFlareDynamicDns
         [Parameter(mandatory = $false)]
         [switch]$IPv6
     )
-	if ($record) {
-		$hostname = "$record.$zone"
+	if ($Record) {
+		$hostname = "$Record.$Zone"
 	} else {
-		$hostname = "$zone"
+		$hostname = "$Zone"
 	}
 	$headers = @{
-		'X-Auth-Key' = $token
-		'X-Auth-Email' = $email
+		'X-Auth-Key' = $Token
+		'X-Auth-Email' = $Email
 	}
 
   if ($IPv6 -ne $true) {
@@ -121,12 +121,12 @@ Function Update-CloudFlareDynamicDns
 
 	Write-Output "Getting Zone information from CloudFlare"
 	$baseurl = "https://api.cloudflare.com/client/v4/zones"
-	$zoneurl = "$baseurl/?name=$zone"
+	$zoneurl = "$baseurl/?name=$Zone"
 
 	try { $cfzone = Invoke-RestMethod -Uri $zoneurl -Method Get -Headers $headers }
 	catch { throw $_.Exception }
 
-	if ($cfzone.result.count -gt 0) { $zoneid = $cfzone.result.id } else { throw "Zone $zone does not exist" }
+	if ($cfzone.result.count -gt 0) { $zoneid = $cfzone.result.id } else { throw "Zone $Zone does not exist" }
 
 	Write-Output "Getting current IP for $hostname"
   if($IPv6 -ne $true) {
@@ -135,7 +135,7 @@ Function Update-CloudFlareDynamicDns
 	   $recordurl = "$baseurl/$zoneid/dns_records/?name=$hostname&type=AAAA"
   }
 
-	if ($usedns -eq $true) {
+	if ($UseDns -eq $true) {
 		try {
       $addresses = [System.Net.Dns]::GetHostEntry($hostname).AddressList
       $cfipaddr = ""
@@ -176,7 +176,7 @@ Function Update-CloudFlareDynamicDns
 	}
 
 	# If the ip has changed or didn't exist, update or add
-	if ($usedns) {
+	if ($UseDns) {
 		Write-Output "Getting CloudFlare Info"
 		try { $dnsrecord = Invoke-RestMethod -Headers $headers -Method Get -Uri $recordurl }
 		catch { throw $_.Exception }
